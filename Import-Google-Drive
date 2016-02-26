@@ -1,0 +1,80 @@
+---
+title: "Google_Drive_Importing_and_Subsetting"
+author: "Ben Bond"
+date: "February 25, 2016"
+output: html_document
+---
+
+
+```{r}
+###############################
+# Importing from Google Drive #
+###############################
+#
+# Instructions good as of 26 Feb 2016
+#
+# In your Google Drive:
+#
+# 1. With your spreadsheet open in Google Drive, go the File menu, and then choose Publish to the web 
+#
+# 2. In the dialog box, click on the second drop-down box, and select Comma-separated values (.csv)
+#
+# 3. Click on the Publish button
+#
+# 4. A new box appears with a URL.  Select the URL and copy it to your clipboard. 
+
+# In your code:
+#
+# Load the RCurl package.  This has functions to pull the data in from Google Drive.
+
+require( RCurl )
+
+# Do you remember the URL you copied to your clipboard just a few seconds ago?  Paste it in the double quotes here.  If not, go back and repeat Step 4 above. 
+
+my.url <- "https://docs.google.com/spreadsheets/d/17_j1MnMg8S49B5K6duBqZttbolPtJ77VQxl8pLtGKTQ/pub?output=csv"
+
+# The getURL function pulls or scrapes the contents of the URL to an object in an unusable format.
+
+my.data.raw <- getURL( my.url, ssl.verifypeer=FALSE )
+
+# The read.csv function reads the my.data.raw object and creates a data frame, which we can use for calculations, etc.  Generally, you want stringsAsFactors to be set to false.  Throw the output to a new object.
+
+# Does your table have headers?  If not, then add the argument header=FALSE
+
+# Generally, a .csv file uses commas as the separator between variable values.  There is a argument called sep whose default is ",".  If your data uses a different separator, then you should add the argument to the function call.
+
+
+
+dat.data <- read.csv( textConnection(my.data.raw), stringsAsFactors=F )
+
+# You now have a data frame of usable data.
+
+###################
+# Subsetting data #
+###################
+
+# The Subset function
+
+# There is a subset function that can be used as a quick way to subset data in a one-off situation.  However, it is better to use the [] subset methods for more complex coding situations.  
+
+# The function is: subset(dat.data, subset criteria, select columns, drop=FALSE )
+
+subset(dat.data, Learner.Need == "ABE Class", select = c(Learner.Name, Learner.Email, Learner.Need))
+
+# Throw it to a new data frame for simplicity
+
+dat.ABE.email <- subset(dat.data, Learner.Need == "ABE Class", select = c(Learner.Name, Learner.Email, Learner.Need))
+
+# You can select all of the columns by dropping the select argument
+
+dat.ABE.email2 <- subset(dat.data, Learner.Need == "ABE Class")
+
+# Alternatively, you can select a range of columns to return
+
+dat.ABE.email3 <- subset(dat.data, Learner.Need == "ABE Class", select = Learner.Name:Referred.To)
+
+# There is a warning in the Help file:
+
+# This is a convenience function intended for use interactively. For programming it is better to use the standard subsetting functions like [, and in particular the non-standard evaluation of argument subset can have unanticipated consequences.
+
+# TRANSLATION: Only use the function if you're working on a simple dataset and creating a simple output.  DO NOT use this in a function or other programming, as there may be scoping issues.     
